@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --ground: #f4f6f4;
+  --surface: #ffffff;
+  --raised: #eef2eb;
+  --border: #e2e8df;
+  --rule: #edf1ea;
+  --control: #d7ded3;
+  --text: #172118;
+  --muted: #576458;
+  --accent: #245229;
+  --accent-soft: #e3ede3;
+  --accent-ink: #143518;
+  --positive: #276738;
+  --negative: #b3261e;
+  --warning: #8f4a00;
+  
+  --radius-card: 20px;
+  --radius-control: 10px;
+  --pad: 20px;
+  --gap: 16px;
+}
+
+body {
+  background-color: var(--ground);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular figures for numbers, money and stats */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccd4c7;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aab5a4;
+}
