@@ -261,31 +261,27 @@ export async function POST(request: Request) {
 
     const sql = getDb();
     if (sql) {
-      try {
+      await sql`
+        INSERT INTO groups (id, name, description, location, trip_date, target_amount, current_amount, bank_account_details, qris_image_url, coordinator_token, invite_code)
+        VALUES (${newGroup.id}, ${newGroup.name}, ${newGroup.description}, ${newGroup.location}, ${newGroup.trip_date}, ${newGroup.target_amount}, ${newGroup.current_amount}, ${newGroup.bank_account_details || null}, ${newGroup.qris_image_url}, ${newGroup.coordinator_token}, ${newGroup.invite_code})
+      `;
+      for (const cat of categories) {
         await sql`
-          INSERT INTO groups (id, name, description, location, trip_date, target_amount, current_amount, bank_account_details, qris_image_url, coordinator_token, invite_code)
-          VALUES (${newGroup.id}, ${newGroup.name}, ${newGroup.description}, ${newGroup.location}, ${newGroup.trip_date}, ${newGroup.target_amount}, ${newGroup.current_amount}, ${newGroup.bank_account_details || null}, ${newGroup.qris_image_url}, ${newGroup.coordinator_token}, ${newGroup.invite_code})
+          INSERT INTO budget_categories (id, group_id, name, allocated_amount, spent_amount)
+          VALUES (${cat.id}, ${cat.group_id}, ${cat.name}, ${cat.allocated_amount}, 0)
         `;
-        for (const cat of categories) {
-          await sql`
-            INSERT INTO budget_categories (id, group_id, name, allocated_amount, spent_amount)
-            VALUES (${cat.id}, ${cat.group_id}, ${cat.name}, ${cat.allocated_amount}, 0)
-          `;
-        }
-        for (const m of members) {
-          const mEmail = m.role === 'COORDINATOR' && body.coordinatorEmail ? body.coordinatorEmail.toLowerCase() : (m.email || null);
-          await sql`
-            INSERT INTO members (id, group_id, name, email, role, member_token, target_quota, paid_amount, avatar_color)
-            VALUES (${m.id}, ${m.group_id}, ${m.name}, ${mEmail}, ${m.role}, ${m.member_token}, ${m.target_quota}, ${m.paid_amount}, ${m.avatar_color})
-          `;
-        }
-        await sql`
-          INSERT INTO activities (id, group_id, actor_name, action, amount)
-          VALUES (${`act-${Date.now()}`}, ${newGroup.id}, ${members[0]?.name || 'Koordinator'}, ${`membuat trip "${newGroup.name}" dengan target ${totalTarget}`}, ${totalTarget})
-        `;
-      } catch (err) {
-        console.warn('Neon insert group error, using memoryStore fallback:', err);
       }
+      for (const m of members) {
+        const mEmail = m.role === 'COORDINATOR' && body.coordinatorEmail ? body.coordinatorEmail.toLowerCase() : (m.email || null);
+        await sql`
+          INSERT INTO members (id, group_id, name, email, role, member_token, target_quota, paid_amount, avatar_color)
+          VALUES (${m.id}, ${m.group_id}, ${m.name}, ${mEmail}, ${m.role}, ${m.member_token}, ${m.target_quota}, ${m.paid_amount}, ${m.avatar_color})
+        `;
+      }
+      await sql`
+        INSERT INTO activities (id, group_id, actor_name, action, amount)
+        VALUES (${`act-${Date.now()}`}, ${newGroup.id}, ${members[0]?.name || 'Koordinator'}, ${`membuat trip "${newGroup.name}" dengan target ${totalTarget}`}, ${totalTarget})
+      `;
     }
 
     memoryStore.groups.set(id, newGroup);

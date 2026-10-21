@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Trash2, Tent, X } from 'lucide-react';
+import { Trash2, Tent, X, Upload } from 'lucide-react';
 import { formatIDR } from '@/lib/format';
 
 interface CreateGroupModalProps {
@@ -36,6 +36,8 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=600&q=80'
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingQris, setIsUploadingQris] = useState(false);
+  const [qrisPreview, setQrisPreview] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -67,6 +69,37 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const handleRemoveCategory = (idx: number) => {
     if (categories.length > 1) {
       setCategories(categories.filter((_, i) => i !== idx));
+    }
+  };
+
+  const handleQrisFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show local preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setQrisPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setIsUploadingQris(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('prefix', 'qris');
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+      if (uploadData.url) {
+        setQrisUrl(uploadData.url);
+      }
+    } catch (err) {
+      console.warn('QRIS image upload failed:', err);
+    } finally {
+      setIsUploadingQris(false);
     }
   };
 
@@ -288,17 +321,38 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             )}
           </div>
 
-          {/* Static QRIS Image URL */}
+          {/* QRIS Upload */}
           <div>
-            <label className="block text-xs font-semibold text-[#182315] mb-1">
-              Link Gambar QRIS Statis Kamu
+            <label className="block text-xs font-semibold text-[#182315] mb-1.5">
+              Upload Foto Barcode QRIS Kas
             </label>
-            <input
-              type="text"
-              value={qrisUrl}
-              onChange={(e) => setQrisUrl(e.target.value)}
-              className="w-full p-2 text-xs bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-emerald-700 outline-none"
-            />
+            <div className="flex items-center gap-3">
+              <label className="flex-1 border-2 border-dashed border-[#D7DED3] hover:border-[#245229] rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer bg-stone-50 hover:bg-stone-100/60 transition-all">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleQrisFileChange}
+                  className="hidden"
+                />
+                <Upload className="w-4 h-4 text-[#245229]" />
+                <span className="text-xs font-semibold text-[#182315]">
+                  {isUploadingQris ? 'Mengunggah QRIS...' : qrisPreview ? 'Ganti Foto QRIS' : 'Pilih Foto QRIS'}
+                </span>
+              </label>
+
+              {(qrisPreview || qrisUrl) && (
+                <div className="w-12 h-12 rounded-xl border border-stone-200 overflow-hidden bg-white shrink-0 p-1 flex items-center justify-center">
+                  <img
+                    src={qrisPreview || qrisUrl}
+                    alt="Preview QRIS"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              )}
+            </div>
+            <p className="text-[10px] text-stone-500 mt-1">
+              Upload foto screenshot barcode QRIS rekening/e-wallet bendahara (max 5MB).
+            </p>
           </div>
 
           <button

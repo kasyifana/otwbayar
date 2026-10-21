@@ -182,7 +182,7 @@ function DashboardContent() {
     return <SplashScreen />;
   }
 
-  if (authStatus === 'unauthenticated' && token && !data) {
+  if (authStatus === 'unauthenticated' && token && !data && !loading) {
     return <GoogleAuthGate onSignIn={() => signIn('google')} />;
   }
 
@@ -409,7 +409,7 @@ function DashboardContent() {
           setGroupId(t.groupId);
           localStorage.setItem('otw_trip_token', t.token);
           localStorage.setItem('otw_trip_group_id', t.groupId);
-          router.push(`/?token=${t.token}`);
+          window.location.href = `/?token=${encodeURIComponent(t.token)}`;
         }}
         onCreateNewTrip={() => setShowCreateGroup(true)}
       />
@@ -422,16 +422,8 @@ function DashboardContent() {
           setGroupId(newGroupId);
           localStorage.setItem('otw_trip_token', coordToken);
           localStorage.setItem('otw_trip_group_id', newGroupId);
-          // Refresh user trips list
-          if (session?.user?.email) {
-            fetch('/api/user/trips')
-              .then((res) => (res.ok ? res.json() : { trips: [] }))
-              .then((data) => {
-                if (data.trips && Array.isArray(data.trips)) setUserTrips(data.trips);
-              })
-              .catch(console.warn);
-          }
-          router.push(`/?token=${coordToken}`);
+          // Hard navigate so Next.js App Router re-renders with fresh search params & DB state
+          window.location.href = `/?token=${encodeURIComponent(coordToken)}`;
         }}
       />
     </div>
