@@ -175,17 +175,17 @@ function DashboardContent() {
     };
   }, [fetchData]);
 
-  // If user is not authenticated yet with Google, show GoogleAuthGate
+  // If user is unauthenticated:
+  // If there's an active token and not logged in with Google, prompt GoogleAuthGate
+  // Otherwise, if no token, display LandingPage so user can choose to login or enter token
   if (authStatus === 'loading') {
     return <SplashScreen />;
   }
 
-  if (authStatus === 'unauthenticated') {
-    // If user opened with a token or has token stored, ask them to sign in to link
+  if (authStatus === 'unauthenticated' && token && !data) {
     return <GoogleAuthGate onSignIn={() => signIn('google')} />;
   }
 
-  // If authenticated but no token & no trip found for this email, show Landing Page
   if (!token && !session?.user?.email && !loading) {
     return <LandingPage />;
   }
