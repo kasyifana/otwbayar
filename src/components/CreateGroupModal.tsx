@@ -39,6 +39,8 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [isUploadingQris, setIsUploadingQris] = useState(false);
   const [qrisPreview, setQrisPreview] = useState<string>('');
 
+  const [selectedQrisFile, setSelectedQrisFile] = useState<File | null>(null);
+
   if (!isOpen) return null;
 
   const totalBudget = categories.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
@@ -72,9 +74,11 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     }
   };
 
-  const handleQrisFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleQrisFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setSelectedQrisFile(file);
 
     // Show local preview immediately
     const reader = new FileReader();
@@ -82,25 +86,6 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       setQrisPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
-
-    setIsUploadingQris(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('prefix', 'qris');
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const uploadData = await uploadRes.json();
-      if (uploadData.url) {
-        setQrisUrl(uploadData.url);
-      }
-    } catch (err) {
-      console.warn('QRIS image upload failed:', err);
-    } finally {
-      setIsUploadingQris(false);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,6 +95,26 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      let finalQrisUrl = qrisUrl;
+
+      // Upload QRIS file if user selected one
+      if (selectedQrisFile) {
+        setIsUploadingQris(true);
+        const formData = new FormData();
+        formData.append('file', selectedQrisFile);
+        formData.append('prefix', 'qris');
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.url) {
+          finalQrisUrl = uploadData.url;
+          setQrisUrl(uploadData.url);
+        }
+        setIsUploadingQris(false);
+      }
+
       const allMembers = [coordinatorName.trim(), ...members];
       const res = await fetch('/api/groups', {
         method: 'POST',
@@ -121,7 +126,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           members: allMembers,
           coordinatorEmail: session?.user?.email || null,
           categories,
-          qris_image_url: qrisUrl,
+          qris_image_url: finalQrisUrl,
         }),
       });
 

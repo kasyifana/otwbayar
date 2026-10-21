@@ -142,11 +142,16 @@ export const DepositModal: React.FC<DepositModalProps> = ({
               QRIS Statis Bendahara
             </span>
 
-            <div className="w-48 h-48 mx-auto bg-white p-2 rounded-[12px] border border-[#E2E8DF] flex items-center justify-center overflow-hidden">
+            <div className="w-56 h-56 mx-auto bg-white p-2 rounded-[16px] border border-[#E2E8DF] shadow-xs flex items-center justify-center overflow-hidden">
               <img
                 src={group.qris_image_url}
                 alt="QRIS Barcode"
                 className="w-full h-full object-contain"
+                onError={(e) => {
+                  // Fallback if image fails to load
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=600&q=80';
+                }}
               />
             </div>
 
