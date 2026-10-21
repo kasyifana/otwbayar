@@ -213,107 +213,94 @@ function DashboardContent() {
 
       {/* Coordinator action notification */}
       {auth.isCoordinator && stats.pendingCount > 0 && (
-        <div className="bg-[#FFF4E5] border-b border-[#FFE0B2] text-[#8F4A00] px-4 py-2 text-xs font-medium">
-          <div className="max-w-5xl mx-auto flex items-center justify-between">
-            <span>
-              Ada {stats.pendingCount} bukti setoran menunggu verifikasi kamu.
-            </span>
-            <button
-              onClick={() => setShowReview(true)}
-              className="bg-[#8F4A00] text-white text-[11px] px-2.5 py-1 rounded-[6px] hover:bg-[#723B00] cursor-pointer"
-            >
-              Review
-            </button>
-          </div>
+        <div className="bg-[#FFF4E5] border-b border-[#FFE0B2] text-[#8F4A00] px-4 py-2 text-xs font-medium flex items-center justify-between">
+          <span>
+            Ada {stats.pendingCount} bukti setoran menunggu verifikasi kamu.
+          </span>
+          <button
+            onClick={() => setShowReview(true)}
+            className="bg-[#8F4A00] text-white text-[11px] px-2.5 py-1 rounded-[6px] hover:bg-[#723B00] cursor-pointer shrink-0 ml-2"
+          >
+            Review
+          </button>
         </div>
       )}
 
       {/* Tab Navigation */}
-      <div className="border-b border-[#E2E8DF] bg-[#F4F6F4]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 flex gap-4">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`pb-2 text-xs font-semibold border-b-2 cursor-pointer transition-colors ${
-              activeTab === 'dashboard'
-                ? 'border-[#245229] text-[#245229]'
-                : 'border-transparent text-[#576458] hover:text-[#172118]'
-            }`}
-          >
-            Overview Tabungan
-          </button>
-          <button
-            onClick={() => setActiveTab('budget')}
-            className={`pb-2 text-xs font-semibold border-b-2 cursor-pointer transition-colors ${
-              activeTab === 'budget'
-                ? 'border-[#245229] text-[#245229]'
-                : 'border-transparent text-[#576458] hover:text-[#172118]'
-            }`}
-          >
-            Pos Biaya ({categories.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('expenses')}
-            className={`pb-2 text-xs font-semibold border-b-2 cursor-pointer transition-colors ${
-              activeTab === 'expenses'
-                ? 'border-[#245229] text-[#245229]'
-                : 'border-transparent text-[#576458] hover:text-[#172118]'
-            }`}
-          >
-            Nota Hari-H ({expenses.length})
-          </button>
-        </div>
+      <div className="px-4 pt-3 flex gap-4 border-b border-[#E2E8DF] bg-[#F4F6F4]">
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className={`pb-2 text-xs font-semibold border-b-2 cursor-pointer transition-colors ${
+            activeTab === 'dashboard'
+              ? 'border-[#245229] text-[#245229]'
+              : 'border-transparent text-[#576458] hover:text-[#172118]'
+          }`}
+        >
+          Overview Tabungan
+        </button>
+        <button
+          onClick={() => setActiveTab('budget')}
+          className={`pb-2 text-xs font-semibold border-b-2 cursor-pointer transition-colors ${
+            activeTab === 'budget'
+              ? 'border-[#245229] text-[#245229]'
+              : 'border-transparent text-[#576458] hover:text-[#172118]'
+          }`}
+        >
+          Pos Biaya ({categories.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('expenses')}
+          className={`pb-2 text-xs font-semibold border-b-2 cursor-pointer transition-colors ${
+            activeTab === 'expenses'
+              ? 'border-[#245229] text-[#245229]'
+              : 'border-transparent text-[#576458] hover:text-[#172118]'
+          }`}
+        >
+          Nota Hari-H ({expenses.length})
+        </button>
       </div>
 
       {/* Main Tab Content */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-4">
+      <main className="flex-1 w-full p-4 space-y-4">
         {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-            {/* Left column on desktop: Hero Card & Activity Feed */}
-            <div className="lg:col-span-5 space-y-4">
-              <HeroCard
-                currentAmount={stats.currentTotal}
-                targetAmount={stats.totalTarget}
-                progressPercent={stats.progressPercent}
-                remainingAmount={stats.remainingAmount}
-                remainingCash={stats.remainingCash}
-                memberCount={members.length}
-                onQuickPay={() => setShowDeposit(true)}
-                onQuickExpense={() => setShowExpense(true)}
-              />
-              <ActivityFeed activities={activities} />
-            </div>
+          <div className="space-y-4">
+            <HeroCard
+              currentAmount={stats.currentTotal}
+              targetAmount={stats.totalTarget}
+              progressPercent={stats.progressPercent}
+              remainingAmount={stats.remainingAmount}
+              remainingCash={stats.remainingCash}
+              memberCount={members.length}
+              onQuickPay={() => setShowDeposit(true)}
+              onQuickExpense={() => setShowExpense(true)}
+            />
 
-            {/* Right column on desktop: Member Grid */}
-            <div className="lg:col-span-7">
-              <MemberGrid
-                members={members}
-                proofs={proofs}
-                currentMemberId={auth.currentMember?.id}
-                onSelectMember={(m) => {
-                  if (auth.isCoordinator && proofs.some((p) => p.member_id === m.id && p.status === 'PENDING')) {
-                    setShowReview(true);
-                  }
-                }}
-              />
-            </div>
+            <MemberGrid
+              members={members}
+              proofs={proofs}
+              currentMemberId={auth.currentMember?.id}
+              onSelectMember={(m) => {
+                if (auth.isCoordinator && proofs.some((p) => p.member_id === m.id && p.status === 'PENDING')) {
+                  setShowReview(true);
+                }
+              }}
+            />
+
+            <ActivityFeed activities={activities} />
           </div>
         )}
 
         {activeTab === 'budget' && (
-          <div className="max-w-3xl mx-auto">
-            <BudgetBreakdown categories={categories} totalTarget={stats.totalTarget} />
-          </div>
+          <BudgetBreakdown categories={categories} totalTarget={stats.totalTarget} />
         )}
 
         {activeTab === 'expenses' && (
-          <div className="max-w-4xl mx-auto">
-            <ExpenseTab
-              group={group}
-              expenses={expenses}
-              members={members}
-              onOpenAddExpense={() => setShowExpense(true)}
-            />
-          </div>
+          <ExpenseTab
+            group={group}
+            expenses={expenses}
+            members={members}
+            onOpenAddExpense={() => setShowExpense(true)}
+          />
         )}
       </main>
 

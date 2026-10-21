@@ -37,11 +37,11 @@ export const HeroCard: React.FC<HeroCardProps> = ({
       </div>
 
       <div className="my-3">
-        <div className="text-3xl font-bold font-tabular text-white tracking-tight">
+        <div className="text-2xl sm:text-3xl font-bold font-tabular text-white tracking-tight truncate">
           {formatIDR(currentAmount)}
         </div>
-        <div className="text-xs text-emerald-200/80 font-tabular mt-1 flex items-center justify-between">
-          <span>Target iuran: {formatIDR(targetAmount)}</span>
+        <div className="text-[11px] text-emerald-200/80 font-tabular mt-1.5 flex flex-wrap items-center justify-between gap-1">
+          <span>Target: {formatIDR(targetAmount)}</span>
           {typeof remainingCash === 'number' && (
             <span className="text-[#FFBE98] font-semibold">Sisa Kas: {formatIDR(remainingCash)}</span>
           )}

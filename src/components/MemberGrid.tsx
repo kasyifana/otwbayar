@@ -31,7 +31,7 @@ export const MemberGrid: React.FC<MemberGridProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 gap-2">
         {members.map((member) => {
           const hasPending = proofs.some(
             (p) => p.member_id === member.id && p.status === 'PENDING'
